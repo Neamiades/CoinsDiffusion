@@ -5,18 +5,39 @@ namespace CoinsDiffusion
 {
     public class Country
     {
-        private Point LeftBottomEdge { get; }
+        private Point _leftBottomEdge;
 
-        private Point RightTopEdge { get; }
+        private Point _rightTopEdge;
 
-        private City[,] _cities;
+        private int _completedCities;
+
+        public City[,] Cities;
 
         public string Name { get; }
 
-        public bool Completed { get; } = false;
+        public event EventHandler<EventArgs> Completed;
 
-        public uint DaysToBeComplete { get; } = 0;
+        protected virtual void OnCountryCompleted(EventArgs e)
+        {
+            Completed?.Invoke(this, e);
+        }
 
+        private bool _isCompleted;
+
+        public bool IsCompleted
+        {
+            get => _isCompleted;
+            private set
+            {
+                if (value)
+                {
+                    _isCompleted = true;
+                    OnCountryCompleted(EventArgs.Empty);
+                }
+            }
+        }
+
+        public uint DaysToBeComplete { get; private set; }
 
         public Country(string name, Point leftBottomEdge, Point rightTopEdge)
         {
@@ -32,25 +53,44 @@ namespace CoinsDiffusion
             }
 
             Name = name;
-            LeftBottomEdge = leftBottomEdge;
-            RightTopEdge = rightTopEdge;
+            _leftBottomEdge = leftBottomEdge;
+            _rightTopEdge = rightTopEdge;
         }
 
-        public void FillCities(City[,] cities, uint startCapital)
+        public void FillCities(City[,] cities, uint startCapital, int motifsCount)
         {
-            _cities = new City[RightTopEdge.X - LeftBottomEdge.X + 1, RightTopEdge.Y - LeftBottomEdge.Y + 1];
+            Cities = new City[_rightTopEdge.X - _leftBottomEdge.X + 1, _rightTopEdge.Y - _leftBottomEdge.Y + 1];
 
-            for (int x = LeftBottomEdge.X, i = 0; x <= RightTopEdge.X; x++, i++)
+            for (int x = _leftBottomEdge.X, i = 0; x <= _rightTopEdge.X; x++, i++)
             {
-                for (int y = LeftBottomEdge.Y, j = 0; y < RightTopEdge.Y; y++, j++)
+                for (int y = _leftBottomEdge.Y, j = 0; y <= _rightTopEdge.Y; y++, j++)
                 {
                     if (cities[x, y] != null)
                     {
                         throw new InvalidDataException("Incorrect input data: countries territories borders conflict");
                     }
-                    cities[x, y] = _cities[i, j] = new City(new Point(x, y), Name.GetHashCode(), startCapital);
+                    cities[x, y] = Cities[i, j] = new City(Name.GetHashCode(), startCapital, motifsCount);
                 }
             }
+        }
+
+        public void CheckForCompletion(object sender, NewDayComedEventArgs e)
+        {
+            _completedCities++;
+            if (Cities.Length == _completedCities)
+            {
+                IsCompleted = true;
+                DaysToBeComplete = e.CurrentDay;
+            }
+        }
+
+        public void CorrectCoordinates(int xAmendment, int yAmendment)
+        {
+            _leftBottomEdge.X -= xAmendment;
+            _leftBottomEdge.Y -= yAmendment;
+
+            _rightTopEdge.X -= xAmendment;
+            _rightTopEdge.Y -= yAmendment;
         }
     }
 }

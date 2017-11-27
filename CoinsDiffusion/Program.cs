@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace CoinsDiffusion
 {
@@ -12,14 +13,47 @@ namespace CoinsDiffusion
 
         static void Main()
         {
-            if (!ParseInputData())
+            if (ParseInputData())
             {
-                return;
+                SetCasesDataForModeling();
+                ModelCases();
+                OutPutModelingResults();
             }
+        }
+
+        private static void OutPutModelingResults()
+        {
+            for (var index = 0; index < _cases.Count; index++)
+            {
+                Console.WriteLine($"Case number {index}");
+                foreach (var country in _cases[index].Countries.OrderBy(c => c.DaysToBeComplete).ThenBy(c => c.Name))
+                {
+                    Console.WriteLine($"{country.Name} {country.DaysToBeComplete}");
+                }
+            }
+        }
+
+        private static void ModelCases()
+        {
+            while (_cases.Any(c => !c.Completed))
+            {
+                foreach (var diffusionCase in _cases)
+                {
+                    if (!diffusionCase.Completed)
+                    {
+                        diffusionCase.ChangeDay();
+                    }
+                }
+            }
+        }
+
+        private static void SetCasesDataForModeling()
+        {
             foreach (var diffusionCase in _cases)
             {
                 diffusionCase.FillCitiesMap();
                 diffusionCase.IdentifyCitiesNeighbors();
+                diffusionCase.SubscribeAll();
             }
         }
 
@@ -28,6 +62,7 @@ namespace CoinsDiffusion
             if (!File.Exists("input.txt"))
             {
                 Console.WriteLine("Error: Input file doesn't exist");
+
                 return false;
             }
 
@@ -53,7 +88,10 @@ namespace CoinsDiffusion
 
                         _cases.Add(new Case { Countries = new Country[countriesCount], StartCityCapital = StartCityCapital });
                         int xlMin, xhMax, ylMin, yhMax;
-                        xlMin = xhMax = yhMax = ylMin = 0;
+                        //xlMin = xhMax = yhMax = ylMin = 0;
+
+                        xhMax = yhMax = 0;
+                        xlMin = ylMin = 100;
 
                         for (int i = 0; i < countriesCount && (line = input.ReadLine()) != null; i++)
                         {
@@ -61,9 +99,9 @@ namespace CoinsDiffusion
 
                             if (countryEntry.Length != 5
                                 || !Int32.TryParse(countryEntry[1], out int xl)
-                                || !Int32.TryParse(countryEntry[1], out int yl)
-                                || !Int32.TryParse(countryEntry[1], out int xh)
-                                || !Int32.TryParse(countryEntry[1], out int yh))
+                                || !Int32.TryParse(countryEntry[2], out int yl)
+                                || !Int32.TryParse(countryEntry[3], out int xh)
+                                || !Int32.TryParse(countryEntry[4], out int yh))
                             {
                                 Console.WriteLine("Error: Incorrect country input");
                                 return false;
@@ -81,6 +119,10 @@ namespace CoinsDiffusion
                             CitiesMapPointsDetect(ref xlMin, ref xhMax, ref ylMin, ref yhMax, xl, yl, xh, yh);
                         }
                         _cases[n].Cities = new City[xhMax - xlMin + 1, yhMax - ylMin + 1];
+                        foreach (var country in _cases[n].Countries)
+                        {
+                            country.CorrectCoordinates(xlMin, ylMin);
+                        }
                     }
                 }
             }
