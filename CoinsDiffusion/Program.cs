@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace CoinsDiffusion
 {
@@ -25,7 +26,8 @@ namespace CoinsDiffusion
         {
             for (var index = 0; index < _cases.Count; index++)
             {
-                Console.WriteLine($"Case number {index}");
+                Console.WriteLine($"Case number {index + 1}");
+
                 foreach (var country in _cases[index].Countries.OrderBy(c => c.DaysToBeComplete).ThenBy(c => c.Name))
                 {
                     Console.WriteLine($"{country.Name} {country.DaysToBeComplete}");
@@ -35,6 +37,12 @@ namespace CoinsDiffusion
 
         private static void ModelCases()
         {
+            foreach (var diffusionCase in _cases)
+            {
+                diffusionCase.ChangeDay();
+                Thread.Sleep(100);
+                diffusionCase.CheckForCompletionPossibility();
+            }
             while (_cases.Any(c => !c.Completed))
             {
                 foreach (var diffusionCase in _cases)

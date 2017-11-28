@@ -5,17 +5,17 @@ namespace CoinsDiffusion
 {
     public class Case
     {
-        private uint _dayCount;
-
         public uint StartCityCapital = 1_000_000;
 
-        private int _completedCountries;
+        private uint _dayCount;
 
-        public bool Completed { get; private set; }
+        private int _completedCountries;
 
         public Country[] Countries;
 
         public City[,] Cities;
+
+        public bool Completed { get; private set; }
 
         public event EventHandler<NewDayComedEventArgs> NewDayHasCome;
 
@@ -72,14 +72,65 @@ namespace CoinsDiffusion
             }
         }
 
-        public void CheckForCompletion(object sender, EventArgs e)
+        private void CheckForCompletion(object sender, EventArgs e)
         {
             _completedCountries++;
+
             if (Countries.Length == _completedCountries)
             {
                 Completed = true;
             }
         }
+
+        public void CheckForCompletionPossibility()
+        {
+            foreach (var country in Countries)
+            {
+                var completionIsPossible = false;
+
+                foreach (var city in country.Cities)
+                {
+                    if (city.Balance.Count > 1)
+                    {
+                        completionIsPossible = true;
+                        break;
+                    }
+                }
+
+                if (!completionIsPossible)
+                {
+                    foreach (var city in country.Cities)
+                    {
+                        NewDayHasCome -= city.TransactAllNeighbors;
+                        city.CityCompleted -= country.CheckForCompletion;
+                    }
+                    country.Completed -= CheckForCompletion;
+                    country.DaysToBeComplete = 0;
+                    CheckForCompletion(null, null);
+                }
+            }
+        }
+
+        //public void OutPutCityMap(object sender, EventArgs e)
+        //{
+        //    Console.SetCursorPosition(0, 0);
+        //    var xLenght = Cities.GetLength(0);
+        //    var yLenght = Cities.GetLength(1);
+
+        //    for (int y = 0; y < yLenght; y++)
+        //    {
+        //        for (int x = 0; x < xLenght; x++)
+        //        {
+        //            Console.ForegroundColor = Cities[x, y] == null
+        //                ? ConsoleColor.Gray
+        //                : Cities[x, y].Completed
+        //                    ? ConsoleColor.Green
+        //                    : ConsoleColor.Yellow;
+        //            Console.Write("* ");
+        //        }
+        //        Console.WriteLine();
+        //    }
+        //}
 
         public void SubscribeAll()
         {

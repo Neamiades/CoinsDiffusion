@@ -3,11 +3,13 @@ using System.IO;
 
 namespace CoinsDiffusion
 {
-    public class Country
+    public sealed class Country
     {
         private Point _leftBottomEdge;
 
         private Point _rightTopEdge;
+
+        public uint DaysToBeComplete { get; set; }
 
         private int _completedCities;
 
@@ -17,17 +19,17 @@ namespace CoinsDiffusion
 
         public event EventHandler<EventArgs> Completed;
 
-        protected virtual void OnCountryCompleted(EventArgs e)
+        private void OnCountryCompleted(EventArgs e)
         {
             Completed?.Invoke(this, e);
         }
 
         private bool _isCompleted;
 
-        public bool IsCompleted
+        private bool IsCompleted
         {
             get => _isCompleted;
-            private set
+            set
             {
                 if (value)
                 {
@@ -36,8 +38,6 @@ namespace CoinsDiffusion
                 }
             }
         }
-
-        public uint DaysToBeComplete { get; private set; }
 
         public Country(string name, Point leftBottomEdge, Point rightTopEdge)
         {
@@ -51,7 +51,6 @@ namespace CoinsDiffusion
                                             "also most southwestward city can't be northeastwardest than most northeastward city.\n" +
                                             "In simple: 1 <= xl <= xh <= 10 and 1 <= yl <= yh <= 10");
             }
-
             Name = name;
             _leftBottomEdge = leftBottomEdge;
             _rightTopEdge = rightTopEdge;
@@ -81,6 +80,28 @@ namespace CoinsDiffusion
             {
                 IsCompleted = true;
                 DaysToBeComplete = e.CurrentDay;
+            }
+        }
+
+        public void CheckForCompletionPossibility(object sender, NewDayComedEventArgs e)
+        {
+            var completionIsPossible = false;
+
+            foreach (var city in Cities)
+            {
+                if (city.Balance.Count > 1)
+                {
+                    completionIsPossible = true;
+                    break;
+                }
+            }
+            if (!completionIsPossible)
+            {
+                foreach (var city in Cities)
+                {
+                    city.CityCompleted -= CheckForCompletion;
+                    city.CityCompleted -= CheckForCompletion;
+                }
             }
         }
 

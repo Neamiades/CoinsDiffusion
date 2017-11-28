@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
-using Motif = System.Int32;
+using CountryHash = System.Int32;
 using Amount = System.UInt32;
 
 namespace CoinsDiffusion
 {
     public class City
     {
-        private readonly Dictionary<Motif, Amount> _balance;
-
-        private readonly List<Currency> _capital;
+        public Dictionary<int, Currency> Balance { get; }
 
         public List<City> Neighbors;
 
         private readonly int _motifsCount;
 
-        private bool _completed;
+        private bool Completed { get; set; }
 
         public event EventHandler<NewDayComedEventArgs> CityCompleted;
 
@@ -26,36 +23,39 @@ namespace CoinsDiffusion
             CityCompleted?.Invoke(this, e);
         }
 
-        public City(Motif motif, Amount startCapital, int motifsCount)
+        public City(CountryHash countryHash, Amount startCapital, int motifsCount)
         {
             //Coordinates = coordinates;
             _motifsCount = motifsCount;
-            _balance = new Dictionary<Motif, Amount> { {motif, startCapital} };
-            _capital = new List<Currency>{ new Currency(motif, startCapital) };
+            Balance = new Dictionary<CountryHash, Currency> {{countryHash, new Currency(startCapital)}};
         }
 
         public void TransactAllNeighbors(object sender, NewDayComedEventArgs e)
         {
+            var keys = Balance.Keys;
+
             foreach (var neighbor in Neighbors)
             {
-                foreach (var currency in _capital)
+                foreach (var key in keys)
                 {
-                    if (currency.Amount > 1000)
+                    if (Balance[key].Amount > 1000)
                     {
-                        if (neighbor._capital.Contains(currency))
+                        var givenCoins = Balance[key].Amount / 1000;
+
+                        if (neighbor.Balance.ContainsKey(key))
                         {
-                            neighbor._balance[motif] += _balance[motif] / 1000;
+                            neighbor.Balance[key].Amount += givenCoins;
                         }
                         else
                         {
-                            neighbor._balance.Add(motif, _balance[motif] / 1000);
+                            neighbor.Balance.Add(key, new Currency(givenCoins));
                         }
-                        _balance[motif] -= _balance[motif] / 1000;
+                        Balance[key].Amount -= givenCoins;
 
-                        if (!neighbor._completed && neighbor._balance.Count == _motifsCount)
+                        if (!neighbor.Completed && neighbor.Balance.Count == _motifsCount)
                         {
-                            neighbor._completed = true;
-                            OnCityCompleted(e);
+                            neighbor.Completed = true;
+                            neighbor.OnCityCompleted(e);
                         }
                     }
                 }
