@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace CoinsDiffusion
 {
@@ -39,9 +38,11 @@ namespace CoinsDiffusion
         {
             foreach (var diffusionCase in _cases)
             {
-                diffusionCase.ChangeDay();
-                Thread.Sleep(100);
-                diffusionCase.CheckForCompletionPossibility();
+                if (!diffusionCase.Completed)
+                {
+                    diffusionCase.ChangeDay();
+                    diffusionCase.CheckForCompletionPossibility();
+                }
             }
             while (_cases.Any(c => !c.Completed))
             {
@@ -57,9 +58,19 @@ namespace CoinsDiffusion
 
         private static void SetCasesDataForModeling()
         {
-            foreach (var diffusionCase in _cases)
+            for (var index = 0; index < _cases.Count; index++)
             {
-                diffusionCase.FillCitiesMap();
+                var diffusionCase = _cases[index];
+                try
+                {
+                    diffusionCase.FillCitiesMap();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message} (Case #{index + 1})");
+                    _cases[index].Completed = true;
+                    continue;
+                }
                 diffusionCase.IdentifyCitiesNeighbors();
                 diffusionCase.SubscribeAll();
             }
@@ -96,7 +107,6 @@ namespace CoinsDiffusion
 
                         _cases.Add(new Case { Countries = new Country[countriesCount], StartCityCapital = StartCityCapital });
                         int xlMin, xhMax, ylMin, yhMax;
-                        //xlMin = xhMax = yhMax = ylMin = 0;
 
                         xhMax = yhMax = 0;
                         xlMin = ylMin = 100;

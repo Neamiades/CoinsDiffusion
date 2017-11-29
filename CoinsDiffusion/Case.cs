@@ -15,7 +15,7 @@ namespace CoinsDiffusion
 
         public City[,] Cities;
 
-        public bool Completed { get; private set; }
+        public bool Completed { get; set; }
 
         public event EventHandler<NewDayComedEventArgs> NewDayHasCome;
 
