@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 
 namespace CoinsDiffusion
@@ -44,13 +45,6 @@ namespace CoinsDiffusion
             if (string.IsNullOrWhiteSpace(name) || name.Length > 25)
                 throw new ArgumentException("Country name can't be null and must have at most 25 characters");
 
-            if (leftBottomEdge.X < 1 || leftBottomEdge.X > rightTopEdge.X || rightTopEdge.X > 10 ||
-                leftBottomEdge.Y < 1 || leftBottomEdge.Y > rightTopEdge.Y || rightTopEdge.Y > 10)
-            {
-                throw new ArgumentException("Countries edge cities coordinates must be at least bigger than 0 and less than 11, " +
-                                            "also most southwestward city can't be northeastwardest than most northeastward city.\n" +
-                                            "In simple: 1 <= xl <= xh <= 10 and 1 <= yl <= yh <= 10");
-            }
             Name = name;
             _leftBottomEdge = leftBottomEdge;
             _rightTopEdge = rightTopEdge;

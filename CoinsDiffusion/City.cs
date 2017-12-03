@@ -14,6 +14,8 @@ namespace CoinsDiffusion
 
         private readonly int _motifsCount;
 
+        private const int CoinsToTransactOne = 1000;
+
         private bool Completed { get; set; }
 
         public event EventHandler<NewDayComedEventArgs> CityCompleted;
@@ -25,7 +27,6 @@ namespace CoinsDiffusion
 
         public City(CountryHash countryHash, Amount startCapital, int motifsCount)
         {
-            //Coordinates = coordinates;
             _motifsCount = motifsCount;
             Balance = new Dictionary<CountryHash, Currency> {{countryHash, new Currency(startCapital)}};
         }
@@ -38,9 +39,9 @@ namespace CoinsDiffusion
             {
                 foreach (var key in keys)
                 {
-                    if (Balance[key].Amount > 1000)
+                    if (Balance[key].Amount > CoinsToTransactOne)
                     {
-                        var givenCoins = Balance[key].Amount / 1000;
+                        var givenCoins = Balance[key].Amount / CoinsToTransactOne;
 
                         if (neighbor.Balance.ContainsKey(key))
                         {

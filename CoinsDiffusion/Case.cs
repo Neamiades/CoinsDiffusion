@@ -40,12 +40,12 @@ namespace CoinsDiffusion
 
         public void IdentifyCitiesNeighbors()
         {
-            var xLenght = Cities.GetLength(0);
-            var yLenght = Cities.GetLength(1);
+            var xLength = Cities.GetLength(0);
+            var yLength = Cities.GetLength(1);
 
-            for (int x = 0; x < xLenght; x++)
+            for (int x = 0; x < xLength; x++)
             {
-                for (int y = 0; y < yLenght; y++)
+                for (int y = 0; y < yLength; y++)
                 {
                     if (Cities[x, y] == null)
                     {
@@ -56,7 +56,7 @@ namespace CoinsDiffusion
                     {
                         Cities[x, y].Neighbors.Add(Cities[x - 1, y]);
                     }
-                    if (x + 1 < xLenght && Cities[x + 1, y] != null)
+                    if (x + 1 < xLength && Cities[x + 1, y] != null)
                     {
                         Cities[x, y].Neighbors.Add(Cities[x + 1, y]);
                     }
@@ -64,7 +64,7 @@ namespace CoinsDiffusion
                     {
                         Cities[x, y].Neighbors.Add(Cities[x, y - 1]);
                     }
-                    if (y + 1 < yLenght && Cities[x, y + 1] != null)
+                    if (y + 1 < yLength && Cities[x, y + 1] != null)
                     {
                         Cities[x, y].Neighbors.Add(Cities[x, y + 1]);
                     }
@@ -72,7 +72,7 @@ namespace CoinsDiffusion
             }
         }
 
-        private void CheckForCompletion(object sender, EventArgs e)
+        private void CompleteIfAllDone(object sender, EventArgs e)
         {
             _completedCountries++;
 
@@ -104,33 +104,12 @@ namespace CoinsDiffusion
                         NewDayHasCome -= city.TransactAllNeighbors;
                         city.CityCompleted -= country.CheckForCompletion;
                     }
-                    country.Completed -= CheckForCompletion;
+                    country.Completed -= CompleteIfAllDone;
                     country.DaysToBeComplete = 0;
-                    CheckForCompletion(null, null);
+                    CompleteIfAllDone(null, null);
                 }
             }
         }
-
-        //public void OutPutCityMap(object sender, EventArgs e)
-        //{
-        //    Console.SetCursorPosition(0, 0);
-        //    var xLenght = Cities.GetLength(0);
-        //    var yLenght = Cities.GetLength(1);
-
-        //    for (int y = 0; y < yLenght; y++)
-        //    {
-        //        for (int x = 0; x < xLenght; x++)
-        //        {
-        //            Console.ForegroundColor = Cities[x, y] == null
-        //                ? ConsoleColor.Gray
-        //                : Cities[x, y].Completed
-        //                    ? ConsoleColor.Green
-        //                    : ConsoleColor.Yellow;
-        //            Console.Write("* ");
-        //        }
-        //        Console.WriteLine();
-        //    }
-        //}
 
         public void SubscribeAll()
         {
@@ -141,7 +120,7 @@ namespace CoinsDiffusion
                     NewDayHasCome += city.TransactAllNeighbors;
                     city.CityCompleted += country.CheckForCompletion;
                 }
-                country.Completed += CheckForCompletion;
+                country.Completed += CompleteIfAllDone;
             }
         }
     }
