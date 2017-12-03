@@ -39,9 +39,11 @@ namespace CoinsDiffusion
         {
             for (var index = 0; index < _cases.Count; index++)
             {
+                var caseCountries = _cases[index].Countries.OrderBy(c => c.DaysToBeComplete).ThenBy(c => c.Name);
+
                 Console.WriteLine($"Case number {index + 1}");
 
-                foreach (var country in _cases[index].Countries.OrderBy(c => c.DaysToBeComplete).ThenBy(c => c.Name))
+                foreach (var country in caseCountries)
                 {
                     Console.WriteLine($"{country.Name} {country.DaysToBeComplete}");
                 }

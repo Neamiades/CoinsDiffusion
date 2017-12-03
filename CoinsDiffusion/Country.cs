@@ -10,22 +10,9 @@ namespace CoinsDiffusion
 
         private Point _rightTopEdge;
 
-        public uint DaysToBeComplete { get; set; }
+        private bool _isCompleted;
 
         private int _completedCities;
-
-        public City[,] Cities;
-
-        public string Name { get; }
-
-        public event EventHandler<EventArgs> Completed;
-
-        private void OnCountryCompleted(EventArgs e)
-        {
-            Completed?.Invoke(this, e);
-        }
-
-        private bool _isCompleted;
 
         private bool IsCompleted
         {
@@ -40,6 +27,14 @@ namespace CoinsDiffusion
             }
         }
 
+        public City[,] Cities;
+
+        public string Name { get; }
+
+        public uint DaysToBeComplete { get; set; }
+
+        public event EventHandler<EventArgs> Completed;
+
         public Country(string name, Point leftBottomEdge, Point rightTopEdge)
         {
             if (string.IsNullOrWhiteSpace(name) || name.Length > 25)
@@ -48,6 +43,11 @@ namespace CoinsDiffusion
             Name = name;
             _leftBottomEdge = leftBottomEdge;
             _rightTopEdge = rightTopEdge;
+        }
+
+        private void OnCountryCompleted(EventArgs e)
+        {
+            Completed?.Invoke(this, e);
         }
 
         public void FillCities(City[,] cities, uint startCapital, int motifsCount)

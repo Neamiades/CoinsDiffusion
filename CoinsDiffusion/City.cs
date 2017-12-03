@@ -8,27 +8,27 @@ namespace CoinsDiffusion
 {
     public class City
     {
-        public Dictionary<int, Currency> Balance { get; }
-
-        public List<City> Neighbors;
+        private const int CoinsToTransactOne = 1000;
 
         private readonly int _motifsCount;
 
-        private const int CoinsToTransactOne = 1000;
-
         private bool Completed { get; set; }
+
+        public List<City> Neighbors;
 
         public event EventHandler<NewDayComedEventArgs> CityCompleted;
 
-        protected virtual void OnCityCompleted(NewDayComedEventArgs e)
-        {
-            CityCompleted?.Invoke(this, e);
-        }
+        public Dictionary<int, Currency> Balance { get; }
 
         public City(CountryHash countryHash, Amount startCapital, int motifsCount)
         {
             _motifsCount = motifsCount;
-            Balance = new Dictionary<CountryHash, Currency> {{countryHash, new Currency(startCapital)}};
+            Balance = new Dictionary<CountryHash, Currency> { { countryHash, new Currency(startCapital) } };
+        }
+
+        protected virtual void OnCityCompleted(NewDayComedEventArgs e)
+        {
+            CityCompleted?.Invoke(this, e);
         }
 
         public void TransactAllNeighbors(object sender, NewDayComedEventArgs e)
